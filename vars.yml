@@ -1,0 +1,2 @@
+external_domain: "example.com"
+internal_domain: "example.internal"

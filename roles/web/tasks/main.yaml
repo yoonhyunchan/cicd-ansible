@@ -1,0 +1,30 @@
+---
+- name: Install nginx
+  dnf:
+    name: nginx
+    state: present
+
+- name: Enable nginx
+  systemd:
+    name: nginx
+    enabled: true
+
+- name: Start nginx
+  systemd:
+    name: nginx
+    state: started
+
+- name: Copy nginx config for chanandy.store
+  template:
+    src: chanandy.store.conf.j2
+    dest: /etc/nginx/conf.d/chanandy.store.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Test nginx configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0

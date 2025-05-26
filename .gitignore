@@ -1,0 +1,11 @@
+# Ansible 캐시, 로그, 임시파일
+*.retry
+*.log
+*.cache
+
+# MacOS 파일
+.DS_Store
+
+# IDE 설정 파일 (VSCode, PyCharm 등)
+.vscode/
+.idea/

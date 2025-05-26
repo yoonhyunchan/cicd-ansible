@@ -1,0 +1,22 @@
+- name: Install git
+  dnf:
+    name: git
+    state: present
+
+- name: Clone oh-my-bash
+  git:
+    repo: https://github.com/ohmybash/oh-my-bash.git
+    dest: /root/.oh-my-bash
+    update: no
+
+- name: Copy default bashrc
+  copy:
+    src: /root/.oh-my-bash/templates/bashrc.osh-template
+    dest: /root/.bashrc
+    remote_src: yes
+
+- name: Set theme to agnoster
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '^OSH_THEME='
+    line: 'OSH_THEME="agnoster"'

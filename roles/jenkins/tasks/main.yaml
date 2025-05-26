@@ -1,0 +1,91 @@
+---
+- name: Install required packages
+  become: true
+  yum:
+    name:
+      - wget
+      - fontconfig
+    state: present
+
+- name: Add Jenkins repo
+  become: true
+  get_url:
+    url: https://pkg.jenkins.io/redhat/jenkins.repo
+    dest: /etc/yum.repos.d/jenkins.repo
+
+- name: Import Jenkins GPG key
+  become: true
+  rpm_key:
+    key: https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+    state: present
+
+- name: Import Corretto GPG key
+  become: true
+  rpm_key:
+    key: https://yum.corretto.aws/corretto.key
+    state: present
+
+- name: Add Corretto repo
+  become: true
+  get_url:
+    url: https://yum.corretto.aws/corretto.repo
+    dest: /etc/yum.repos.d/corretto.repo
+
+- name: Install Amazon Corretto 21 and Jenkins
+  become: true
+  yum:
+    name:
+      - java-21-amazon-corretto
+      - jenkins
+    state: present
+
+- name: Enable and start Jenkins
+  become: true
+  systemd:
+    name: jenkins
+    enabled: true
+    state: started
+    daemon_reload: yes
+
+- name: Generate Jenkins keystore using keytool
+  become: true
+  shell: |
+    keytool -genkeypair \
+      -alias jenkins \
+      -keyalg RSA \
+      -keysize 2048 \
+      -validity 365 \
+      -keystore ./jenkins.p12 \
+      -storepass mypasswd \
+      -dname "CN=jenkins.{{ internal_domain }}, OU=Dev, O=MyOrg, L=Seoul, S=Seoul, C=KR"
+  args:
+    chdir: /var/lib/jenkins   # keytool 실행 위치를 지정 (jenkins.p12 생성 위치)
+
+- name: Create systemd override directory
+  become: true
+  file:
+    path: /etc/systemd/system/jenkins.service.d
+    state: directory
+    mode: '0755'
+
+- name: Set Jenkins HTTPS environment override
+  become: true
+  copy:
+    dest: /etc/systemd/system/jenkins.service.d/override.conf
+    content: |
+      [Service]
+      Environment="JENKINS_PORT=-1"
+      Environment="JENKINS_HTTPS_PORT=8443"
+      Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkins.p12"
+      Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=mypasswd"
+
+- name: Reload systemd daemon
+  become: true
+  systemd:
+    daemon_reload: true
+
+- name: Restart Jenkins service
+  become: true
+  systemd:
+    name: jenkins
+    state: restarted

@@ -1,0 +1,18 @@
+- name : setup init
+  hosts: all
+  become: true
+  vars_files:
+    - vars.yml
+  roles:
+    - setup_init
+
+- name: Install Jenkins
+  hosts: jenkins_controller
+  become: true
+  roles:
+    - jenkins
+- name: Web Server
+  hosts: web
+  become: true
+  roles:
+    - web
