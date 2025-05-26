@@ -22,6 +22,6 @@ server {
 # 공통 HTTP → HTTPS 리디렉션
 server {
     listen 80;
-    server_name gitlab{{ external_domain }} jenkins{{ external_domain }} harbor{{ external_domain }};
+    server_name gitlab.{{ external_domain }} jenkins.{{ external_domain }} harbor.{{ external_domain }};
     return 301 https://$host$request_uri;
 }
