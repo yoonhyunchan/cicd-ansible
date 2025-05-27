@@ -4,6 +4,14 @@
   roles:
     - setup_init
 
+- name: Install Gitlab
+  hosts: gitlab
+  become: true
+  vars_files:
+    - vars.yml
+  roles:
+    - gitlab
+
 - name: Install Jenkins
   hosts: jenkins_controller
   become: true
@@ -11,6 +19,7 @@
     - vars.yml
   roles:
     - jenkins
+    
 - name: Web Server
   hosts: web
   become: true

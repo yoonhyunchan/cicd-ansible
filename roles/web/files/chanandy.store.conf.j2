@@ -1,7 +1,28 @@
+# Gitlab
+server {
+    listen 443 ssl;
+    server_name gitlab.{{ external_domain }};
+
+    ssl_certificate /etc/letsencrypt/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass https://gitlab.{{ internal_domain }};  # GitLab 내부 IP
+        proxy_ssl_trusted_certificate /etc/ssl/private/gitlab.{{ internal_domain }}.crt;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+
 # Jenkins
 server {
     listen 443 ssl;
-    # server_name jenkins{{ external_domain }};
     server_name jenkins.{{ external_domain }};
 
     ssl_certificate /etc/letsencrypt/fullchain.pem;
@@ -18,6 +39,27 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+
+# Harbor
+# server {
+#     listen 443 ssl;
+#     server_name harbor.{{ external_domain }};
+
+#     ssl_certificate /etc/letsencrypt/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/privkey.pem;
+
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+
+#     location / {
+#         proxy_pass https://harbor.{{ internal_domain }};  # GitLab 내부 IP
+#         proxy_ssl_trusted_certificate /etc/ssl/private/harbor.{{ internal_domain }}.crt;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
 
 # 공통 HTTP → HTTPS 리디렉션
 server {

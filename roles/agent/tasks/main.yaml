@@ -1,0 +1,69 @@
+# rpm --import https://yum.corretto.aws/corretto.key
+# curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+# yum install -y java-21-amazon-corretto
+
+- name: Import Corretto GPG key
+  become: true
+  rpm_key:
+    key: https://yum.corretto.aws/corretto.key
+    state: present
+
+- name: Add Corretto repo
+  become: true
+  get_url:
+    url: https://yum.corretto.aws/corretto.repo
+    dest: /etc/yum.repos.d/corretto.repo
+
+- name: Install Amazon Corretto 21
+  become: true
+  yum:
+    name:
+      - java-21-amazon-corretto
+    state: present
+
+# sudo useradd -m -s /bin/bash jenkins
+# sudo mkdir -p /home/jenkins/.ssh
+# sudo cp /home/ec2-user/.ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
+
+- name: Ensure jenkins user exists
+  user:
+    name: jenkins
+    shell: /bin/bash
+    state: present
+    create_home: yes
+
+- name: Ensure /home/jenkins/.ssh directory exists
+  file:
+    path: /home/jenkins/.ssh
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0700'
+
+- name: Copy ec2-user's authorized_keys to jenkins
+  copy:
+    src: /home/ec2-user/.ssh/authorized_keys
+    dest: /home/jenkins/.ssh/authorized_keys
+    owner: jenkins
+    group: jenkins
+    mode: '0600'
+
+# sudo yum install -y docker
+# sudo service docker start
+# sudo usermod -a -G docker jenkins
+- name: Install Docker
+  yum:
+    name: docker
+    state: present
+
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add jenkins user to docker group
+  user:
+    name: jenkins
+    groups: docker
+    append: yes

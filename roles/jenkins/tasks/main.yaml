@@ -89,3 +89,19 @@
   systemd:
     name: jenkins
     state: restarted
+
+- name: Ensure /var/lib/jenkins/.ssh directory exists
+  file:
+    path: /var/lib/jenkins/.ssh
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0700'
+
+- name: Add agent1 SSH key to Jenkins known_hosts
+  become: true
+  become_user: jenkins
+  shell: |
+    ssh-keyscan -H agent1.{{ internal_domain }} >> /var/lib/jenkins/.ssh/known_hosts
+  args:
+    creates: /var/lib/jenkins/.ssh/known_hosts
