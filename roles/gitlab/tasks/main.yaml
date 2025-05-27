@@ -58,47 +58,15 @@
     dest: /etc/ssl/private/                                 # 로컬 저장 경로 (디렉토리)
     flat: yes                                      # true면 dest를 디렉토리로 안보고 파일명까지 포함해서 저장
 
-- name: Set external_url in gitlab.rb
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: '^#?external_url\s*=.*'
-    line: "external_url 'https://gitlab.chanandy.store'"
-    create: yes
+- name: Generate /etc/gitlab/gitlab.rb from template
+  template:
+    src: ../files/gitlab.rb.template.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: '0644'
+  diff: yes
 
-- name: Enable nginx
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: "^#?nginx\\['enable'\\]\\s*=.*"
-    line: "nginx['enable'] = true"
-    create: yes
-
-- name: Enable redirect HTTP to HTTPS
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: "^#?nginx\\['redirect_http_to_https'\\]\\s*=.*"
-    line: "nginx['redirect_http_to_https'] = true"
-    create: yes
-
-- name: Set redirect HTTP to HTTPS port
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: "^#?nginx\\['redirect_http_to_https_port'\\]\\s*=.*"
-    line: "nginx['redirect_http_to_https_port'] = 80"
-    create: yes
-
-- name: Set ssl_certificate
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: "^#?nginx\\['ssl_certificate'\\]\\s*=.*"
-    line: "nginx['ssl_certificate'] = \"/root/gitlab_certs/gitlab.{{ internal_domain }}.crt\""
-    create: yes
-
-- name: Set ssl_certificate_key
-  lineinfile:
-    path: /etc/gitlab/gitlab.rb
-    regexp: "^#?nginx\\['ssl_certificate_key'\\]\\s*=.*"
-    line: "nginx['ssl_certificate_key'] = \"/root/gitlab_certs/gitlab.{{ internal_domain }}.key\""
-    create: yes
 
 - name: Reconfigure GitLab
   command: gitlab-ctl reconfigure

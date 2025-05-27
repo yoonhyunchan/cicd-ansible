@@ -100,7 +100,6 @@
 
 - name: Add agent1 SSH key to Jenkins known_hosts
   become: true
-  become_user: jenkins
   shell: |
     ssh-keyscan -H agent1.{{ internal_domain }} >> /var/lib/jenkins/.ssh/known_hosts
   args:

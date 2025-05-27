@@ -48,6 +48,7 @@
     group: jenkins
     mode: '0600'
 
+
 # sudo yum install -y docker
 # sudo service docker start
 # sudo usermod -a -G docker jenkins
@@ -55,7 +56,6 @@
   yum:
     name: docker
     state: present
-
 - name: Start and enable Docker service
   service:
     name: docker
