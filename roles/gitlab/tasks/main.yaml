@@ -40,14 +40,15 @@
 - name: Generate private key
   command: >
     openssl genrsa -out /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key 4096
+    
   args:
     creates: /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key
 
 - name: Generate self-signed certificate
   command: >
-    openssl req -x509 -new -nodes -sha512 -days 3650
-    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN=gitlab.{{ internal_domain }}"
-    -key /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key
+    openssl req -x509 -new -nodes -sha512 -days 3650 
+    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN=gitlab.{{ internal_domain }}" 
+    -key /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key 
     -out /etc/gitlab/ssl/gitlab.{{ internal_domain }}.crt
   args:
     creates: /etc/gitlab/ssl/gitlab.{{ internal_domain }}.crt
