@@ -19,6 +19,20 @@
     - vars.yml
   roles:
     - jenkins
+
+- name: Setting Jenkins Agent
+  hosts: jenkins_agent
+  become: true
+  roles:
+    - agent
+
+- name: Install Harbor
+  hosts: harbor
+  become: true
+  vars_files:
+    - vars.yml
+  roles:
+    - harbor
     
 - name: Web Server
   hosts: web

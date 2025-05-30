@@ -1,3 +1,31 @@
+---
+- name: Create swap file
+  command: fallocate -l 4G /swapfile4g
+  args:
+    creates: /swapfile4g
+
+- name: Set permissions on swap file
+  file:
+    path: /swapfile4g
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Make swap
+  command: mkswap /swapfile4g
+  when: ansible_facts.swapfree_mb < 4096  # 필요 시 조건 조정
+
+- name: Enable swap
+  command: swapon /swapfile4g
+  register: swapon_result
+  failed_when: "'already in use' in swapon_result.stderr"
+
+- name: Add swap to /etc/fstab
+  lineinfile:
+    path: /etc/fstab
+    line: '/swapfile4g none swap sw 0 0'
+    state: present
+
 - name: Install dependencies
   dnf:
     name:
@@ -66,7 +94,6 @@
     owner: root
     group: root
     mode: '0644'
-  diff: yes
 
 
 - name: Reconfigure GitLab

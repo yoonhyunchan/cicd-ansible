@@ -41,7 +41,7 @@
 
 - name: Copy nginx config for chanandy.store
   template:
-    src: ../files/chanandy.store.conf.j2
+    src: ../files/chanandy.store.conf.template.j2
     dest: /etc/nginx/conf.d/chanandy.store.conf
     owner: root
     group: root

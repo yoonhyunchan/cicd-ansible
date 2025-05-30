@@ -1,3 +1,19 @@
+- name: Check if /tmp is mounted as tmpfs
+  shell: mount | grep -q 'on /tmp type tmpfs'
+  register: tmpfs_check
+  changed_when: false
+  failed_when: false
+
+- name: Remount /tmp with size=4G if it's tmpfs
+  mount:
+    path: /tmp
+    fstype: tmpfs
+    opts: size=4G,nosuid,nodev,seclabel
+    state: mounted
+    dump: 0
+    passno: 0
+  when: tmpfs_check.rc == 0
+
 # rpm --import https://yum.corretto.aws/corretto.key
 # curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
 # yum install -y java-21-amazon-corretto

@@ -1,0 +1,152 @@
+- name: Install Docker
+  yum:
+    name: docker
+    state: present
+  become: yes
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
+  become: yes
+
+- name: Add ec2-user to docker group
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Create Docker CLI plugins directory
+  file:
+    path: /usr/local/lib/docker/cli-plugins
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Download Docker Compose binary
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-linux-x86_64
+    dest: /usr/local/lib/docker/cli-plugins/docker-compose
+    mode: '0755'
+  become: yes
+
+- name: Download Harbor installer
+  get_url:
+    url: https://github.com/goharbor/harbor/releases/download/v2.12.3/harbor-online-installer-v2.12.3.tgz
+    dest: /tmp/harbor-online-installer-v2.12.3.tgz
+  become: yes
+
+- name: Extract Harbor installer
+  unarchive:
+    src: /tmp/harbor-online-installer-v2.12.3.tgz
+    dest: /opt/
+    remote_src: yes
+    creates: /opt/harbor
+  become: yes
+
+
+- name: Ensure certs directory exists
+  file:
+    path: "{{ cert_dir }}"
+    state: directory
+
+- name: Generate CA private key
+  command: openssl genrsa -out ca.key 4096
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/ca.key"
+
+- name: Generate CA certificate
+  command: >
+    openssl req -x509 -new -nodes -sha512 -days 3650
+    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN={{ internal_domain }}"
+    -key ca.key -out ca.crt
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/ca.crt"
+
+- name: Generate server private key
+  command: openssl genrsa -out {{ internal_domain }}.key 4096
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/{{ internal_domain }}.key"
+
+- name: Generate CSR
+  command: >
+    openssl req -sha512 -new
+    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN={{ internal_domain }}"
+    -key {{ internal_domain }}.key -out {{ internal_domain }}.csr
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/{{ internal_domain }}.csr"
+
+- name: Template v3.ext
+  template:
+    src: v3.ext.template.j2
+    dest: "{{ cert_dir }}/v3.ext"
+
+- name: Generate server certificate
+  command: >
+    openssl x509 -req -sha512 -days 3650
+    -extfile v3.ext
+    -CA ca.crt -CAkey ca.key -CAcreateserial
+    -in {{ internal_domain }}.csr -out {{ internal_domain }}.crt
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/{{ internal_domain }}.crt"
+
+- name: Convert CRT to CERT (PEM)
+  command: >
+    openssl x509 -inform PEM -in {{ internal_domain }}.crt -out {{ internal_domain }}.cert
+  args:
+    chdir: "{{ cert_dir }}"
+    creates: "{{ cert_dir }}/{{ internal_domain }}.cert"
+
+- name: Ensure docker cert directory exists
+  file:
+    path: "{{ docker_cert_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy cert to Docker cert directory
+  copy:
+    src: "{{ cert_dir }}/{{ item.src }}"
+    dest: "{{ docker_cert_dir }}/{{ item.dest }}"
+  loop:
+    - { src: "{{ internal_domain }}.cert", dest: "{{ internal_domain }}.cert" }
+    - { src: "{{ internal_domain }}.key", dest: "{{ internal_domain }}.key" }
+    - { src: "ca.crt", dest: "ca.crt" }
+
+- name: Restart Docker
+  systemd:
+    name: docker
+    state: restarted
+    enabled: true
+
+- name: Fetch the certificate file from remote host
+  fetch:
+    src: "{{ cert_dir }}/ca.crt"  # 원격 서버 파일 경로
+    dest: /etc/ssl/private/harbor.{{ internal_domain }}.crt                                 # 로컬 저장 경로 (디렉토리)
+    flat: yes                                      # true면 dest를 디렉토리로 안보고 파일명까지 포함해서 저장
+
+
+- name: Copy harbor.yml from template
+  template:
+    src: harbor.yml.template.j2
+    dest: /opt/harbor/harbor.yml
+    mode: '0644'
+  become: yes
+
+- name: Run prepare script
+  command: ./prepare
+  args:
+    chdir: /opt/harbor
+  become: yes
+
+- name: Run install script
+  command: ./install.sh
+  args:
+    chdir: /opt/harbor
+  become: yes
