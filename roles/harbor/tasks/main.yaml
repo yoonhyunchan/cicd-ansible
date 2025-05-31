@@ -49,7 +49,7 @@
 
 - name: Ensure certs directory exists
   file:
-    path: "{{ cert_dir }}"
+    path: "{{ cert_dir }}"  # /root/.certs
     state: directory
 
 - name: Generate CA private key
@@ -61,30 +61,30 @@
 - name: Generate CA certificate
   command: >
     openssl req -x509 -new -nodes -sha512 -days 3650
-    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN={{ internal_domain }}"
+    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN=harbor.{{ internal_domain }}"
     -key ca.key -out ca.crt
   args:
     chdir: "{{ cert_dir }}"
     creates: "{{ cert_dir }}/ca.crt"
 
 - name: Generate server private key
-  command: openssl genrsa -out {{ internal_domain }}.key 4096
+  command: openssl genrsa -out harbor.{{ internal_domain }}.key 4096
   args:
     chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/{{ internal_domain }}.key"
+    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.key"
 
 - name: Generate CSR
   command: >
     openssl req -sha512 -new
     -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN={{ internal_domain }}"
-    -key {{ internal_domain }}.key -out {{ internal_domain }}.csr
+    -key harbor.{{ internal_domain }}.key -out harbor.{{ internal_domain }}.csr
   args:
     chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/{{ internal_domain }}.csr"
+    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.csr"
 
 - name: Template v3.ext
   template:
-    src: v3.ext.template.j2
+    src: ../files/v3.ext.template.j2
     dest: "{{ cert_dir }}/v3.ext"
 
 - name: Generate server certificate
@@ -92,17 +92,17 @@
     openssl x509 -req -sha512 -days 3650
     -extfile v3.ext
     -CA ca.crt -CAkey ca.key -CAcreateserial
-    -in {{ internal_domain }}.csr -out {{ internal_domain }}.crt
+    -in harbor.{{ internal_domain }}.csr -out harbor.{{ internal_domain }}.crt
   args:
     chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/{{ internal_domain }}.crt"
+    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.crt"
 
 - name: Convert CRT to CERT (PEM)
   command: >
-    openssl x509 -inform PEM -in {{ internal_domain }}.crt -out {{ internal_domain }}.cert
+    openssl x509 -inform PEM -in harbor.{{ internal_domain }}.crt -out harbor.{{ internal_domain }}.cert
   args:
     chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/{{ internal_domain }}.cert"
+    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.cert"
 
 - name: Ensure docker cert directory exists
   file:
@@ -110,13 +110,11 @@
     state: directory
     mode: '0755'
 
-- name: Copy cert to Docker cert directory
-  copy:
-    src: "{{ cert_dir }}/{{ item.src }}"
-    dest: "{{ docker_cert_dir }}/{{ item.dest }}"
+- name: Copy certs within the remote server
+  shell: cp "{{ cert_dir }}/{{ item.src }}" "{{ docker_cert_dir }}/{{ item.dest }}"
   loop:
-    - { src: "{{ internal_domain }}.cert", dest: "{{ internal_domain }}.cert" }
-    - { src: "{{ internal_domain }}.key", dest: "{{ internal_domain }}.key" }
+    - { src: "harbor.{{ internal_domain }}.cert", dest: "harbor.{{ internal_domain }}.cert" }
+    - { src: "harbor.{{ internal_domain }}.key", dest: "harbor.{{ internal_domain }}.key" }
     - { src: "ca.crt", dest: "ca.crt" }
 
 - name: Restart Docker
@@ -134,7 +132,7 @@
 
 - name: Copy harbor.yml from template
   template:
-    src: harbor.yml.template.j2
+    src: ../files/harbor.yml.template.j2
     dest: /opt/harbor/harbor.yml
     mode: '0644'
   become: yes

@@ -1,4 +1,4 @@
 external_domain: "example.com"
 internal_domain: "example.internal"
 cert_dir: /root/.certs
-docker_cert_dir: "/etc/docker/certs.d/{{ internal_domain }}"
+docker_cert_dir: "/etc/docker/certs.d/harbor.{{ internal_domain }}"
