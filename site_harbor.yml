@@ -1,7 +1,0 @@
-- name: Install Harbor
-  hosts: harbor
-  become: true
-  vars_files:
-    - vars.yml
-  roles:
-    - harbor

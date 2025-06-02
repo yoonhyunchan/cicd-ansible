@@ -1,3 +1,4 @@
+
 - name: Install Docker
   yum:
     name: docker
@@ -46,63 +47,12 @@
     creates: /opt/harbor
   become: yes
 
+- name: Convert .crt (PEM) to .cert (PEM)
+  community.crypto.x509_certificate_convert:
+    src_path: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.crt"
+    dest_path: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.cert"
+    format: pem
 
-- name: Ensure certs directory exists
-  file:
-    path: "{{ cert_dir }}"  # /root/.certs
-    state: directory
-
-- name: Generate CA private key
-  command: openssl genrsa -out ca.key 4096
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/ca.key"
-
-- name: Generate CA certificate
-  command: >
-    openssl req -x509 -new -nodes -sha512 -days 3650
-    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN=harbor.{{ internal_domain }}"
-    -key ca.key -out ca.crt
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/ca.crt"
-
-- name: Generate server private key
-  command: openssl genrsa -out harbor.{{ internal_domain }}.key 4096
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.key"
-
-- name: Generate CSR
-  command: >
-    openssl req -sha512 -new
-    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN={{ internal_domain }}"
-    -key harbor.{{ internal_domain }}.key -out harbor.{{ internal_domain }}.csr
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.csr"
-
-- name: Template v3.ext
-  template:
-    src: ../files/v3.ext.template.j2
-    dest: "{{ cert_dir }}/v3.ext"
-
-- name: Generate server certificate
-  command: >
-    openssl x509 -req -sha512 -days 3650
-    -extfile v3.ext
-    -CA ca.crt -CAkey ca.key -CAcreateserial
-    -in harbor.{{ internal_domain }}.csr -out harbor.{{ internal_domain }}.crt
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.crt"
-
-- name: Convert CRT to CERT (PEM)
-  command: >
-    openssl x509 -inform PEM -in harbor.{{ internal_domain }}.crt -out harbor.{{ internal_domain }}.cert
-  args:
-    chdir: "{{ cert_dir }}"
-    creates: "{{ cert_dir }}/harbor.{{ internal_domain }}.cert"
 
 - name: Ensure docker cert directory exists
   file:
@@ -111,23 +61,17 @@
     mode: '0755'
 
 - name: Copy certs within the remote server
-  shell: cp "{{ cert_dir }}/{{ item.src }}" "{{ docker_cert_dir }}/{{ item.dest }}"
+  shell: cp "{{ item.src }}" "{{ docker_cert_dir }}/{{ item.dest }}"
   loop:
-    - { src: "harbor.{{ internal_domain }}.cert", dest: "harbor.{{ internal_domain }}.cert" }
-    - { src: "harbor.{{ internal_domain }}.key", dest: "harbor.{{ internal_domain }}.key" }
-    - { src: "ca.crt", dest: "ca.crt" }
+    - { src: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.cert", dest: "harbor.{{ internal_domain }}.cert" }
+    - { src: "{{ cert_dir }}/private/harbor.{{ internal_domain }}.key", dest: "harbor.{{ internal_domain }}.key" }
+    - { src: "/etc/pki/ca-trust/source/anchors/ca.crt", dest: "ca.crt" }
 
 - name: Restart Docker
   systemd:
     name: docker
     state: restarted
     enabled: true
-
-- name: Fetch the certificate file from remote host
-  fetch:
-    src: "{{ cert_dir }}/ca.crt"  # 원격 서버 파일 경로
-    dest: /etc/ssl/private/harbor.{{ internal_domain }}.crt                                 # 로컬 저장 경로 (디렉토리)
-    flat: yes                                      # true면 dest를 디렉토리로 안보고 파일명까지 포함해서 저장
 
 
 - name: Copy harbor.yml from template

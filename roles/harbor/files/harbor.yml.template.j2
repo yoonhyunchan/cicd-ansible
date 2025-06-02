@@ -14,8 +14,8 @@ https:
   # https port for harbor, default is 443
   port: 443
   # The path of cert and key files for nginx
-  certificate: /etc/docker/certs.d/harbor.{{ internal_domain }}/harbor.{{ internal_domain }}.cert
-  private_key: /etc/docker/certs.d/harbor.{{ internal_domain }}/harbor.{{ internal_domain }}.key
+  certificate: /etc/ssl/my_cert/harbor.{{ internal_domain }}.crt
+  private_key: /etc/ssl/private/harbor.{{ internal_domain }}.key
   # enable strong ssl ciphers (default: false)
   # strong_ssl_ciphers: false
 

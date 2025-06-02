@@ -65,28 +65,6 @@
     group: root
     mode: '0755'
 
-- name: Generate private key
-  command: >
-    openssl genrsa -out /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key 4096
-    
-  args:
-    creates: /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key
-
-- name: Generate self-signed certificate
-  command: >
-    openssl req -x509 -new -nodes -sha512 -days 3650 
-    -subj "/C=KR/ST=Seoul/L=Seoul/O=Chanandy/OU=Personal/CN=gitlab.{{ internal_domain }}" 
-    -key /etc/gitlab/ssl/gitlab.{{ internal_domain }}.key 
-    -out /etc/gitlab/ssl/gitlab.{{ internal_domain }}.crt
-  args:
-    creates: /etc/gitlab/ssl/gitlab.{{ internal_domain }}.crt
-
-- name: Fetch the certificate file from remote host
-  fetch:
-    src: /etc/gitlab/ssl/gitlab.{{ internal_domain }}.crt   # 원격 서버 파일 경로
-    dest: /etc/ssl/private/                                 # 로컬 저장 경로 (디렉토리)
-    flat: yes                                      # true면 dest를 디렉토리로 안보고 파일명까지 포함해서 저장
-
 - name: Generate /etc/gitlab/gitlab.rb from template
   template:
     src: ../files/gitlab.rb.template.j2

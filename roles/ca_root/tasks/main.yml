@@ -1,0 +1,41 @@
+- name: Ensure /etc/ssl/private directory exists
+  file:
+    path: /etc/ssl/private
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Ensure /etc/ssl/my_cert directory exists
+  file:
+    path: /etc/ssl/my_cert
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+
+
+- name: Create private key with password protection
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/ca.key
+
+- name: Create certificate signing request (CSR) for CA certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/ssl/private/ca.key
+    common_name: Chan CA
+    use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+  register: ca_csr
+
+- name: Create self-signed CA certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/ssl/my_cert/ca.crt
+    csr_content: "{{ ca_csr.csr }}"
+    privatekey_path: /etc/ssl/private/ca.key
+    provider: selfsigned

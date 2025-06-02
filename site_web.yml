@@ -1,7 +1,0 @@
-- name: Web Server
-  hosts: web
-  become: true
-  vars_files:
-    - vars.yml
-  roles:
-    - web

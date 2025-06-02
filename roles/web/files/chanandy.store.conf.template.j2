@@ -11,7 +11,7 @@ server {
 
     location / {
         proxy_pass https://gitlab.{{ internal_domain }};  # GitLab 내부 IP
-        proxy_ssl_trusted_certificate /etc/ssl/private/gitlab.{{ internal_domain }}.crt;
+        proxy_ssl_trusted_certificate /etc/pki/ca-trust/source/anchors/ca.crt;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -53,7 +53,7 @@ server {
 
     location / {
         proxy_pass https://harbor.{{ internal_domain }};  # GitLab 내부 IP
-        proxy_ssl_trusted_certificate /etc/ssl/private/harbor.{{ internal_domain }}.crt;
+        proxy_ssl_trusted_certificate /etc/pki/ca-trust/source/anchors/ca.crt;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

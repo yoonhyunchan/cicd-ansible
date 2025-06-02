@@ -1,0 +1,53 @@
+- name: Ensure /etc/ssl/private directory exists
+  file:
+    path: /etc/ssl/private
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# Server에서 개인키 생성
+- name: Create private key for new certificate
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/{{ inventory_hostname }}.key
+    size: 4096
+
+# CSR 파일 생성
+- name: Create certificate signing request (CSR) for new certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
+    subject_alt_name_critical: true
+    subject_alt_name:
+      - "DNS:{{ inventory_hostname }}"
+  register: csr
+
+- name: Set fact for csr content
+  set_fact:
+    csr_content: "{{ csr.csr }}"
+
+# 로컬(Ansible을 실행하는 곳)에서 CSR 서명
+- name: Sign CSR on localhost
+  community.crypto.x509_certificate:
+    path: /tmp/{{ inventory_hostname }}.crt
+    csr_content: "{{ csr_content }}"
+    provider: ownca
+    ownca_path: /etc/ssl/my_cert/ca.crt
+    ownca_privatekey_path: /etc/ssl/private/ca.key
+  delegate_to: localhost
+
+- name: Ensure /etc/ssl/my_cert directory exists
+  file:
+    path: /etc/ssl/my_cert
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# 서버로 서명된 인증서 복사
+- name: Copy signed certificate from localhost to server
+  copy:
+    src: "/tmp/{{ inventory_hostname }}.crt"
+    dest: "/etc/ssl/my_cert/{{ inventory_hostname }}.crt"
+    owner: root
+    group: root
+    mode: '0644'

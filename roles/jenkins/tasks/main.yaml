@@ -1,4 +1,3 @@
----
 - name: Install required packages
   become: true
   yum:
@@ -47,19 +46,18 @@
     state: started
     daemon_reload: yes
 
-- name: Generate Jenkins keystore using keytool
-  become: true
-  shell: |
-    keytool -genkeypair \
-      -alias jenkins \
-      -keyalg RSA \
-      -keysize 2048 \
-      -validity 365 \
-      -keystore ./jenkins.p12 \
-      -storepass mypasswd \
-      -dname "CN=jenkins.{{ internal_domain }}, OU=Dev, O=MyOrg, L=Seoul, S=Seoul, C=KR"
-  args:
-    chdir: /var/lib/jenkins   # keytool 실행 위치를 지정 (jenkins.p12 생성 위치)
+
+- name: Generate PKCS#12 file
+  community.crypto.openssl_pkcs12:
+    action: export
+    path: /var/lib/jenkins/keystore.p12
+    privatekey_path: /etc/ssl/private/jenkins.chanandy.internal.key
+    certificate_path: /etc/ssl/my_cert/jenkins.chanandy.internal.crt
+    friendly_name: mykey
+    passphrase: pwdpwd
+    state: present
+    owner: jenkins
+
 
 - name: Create systemd override directory
   become: true
@@ -76,8 +74,8 @@
       [Service]
       Environment="JENKINS_PORT=-1"
       Environment="JENKINS_HTTPS_PORT=8443"
-      Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkins.p12"
-      Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=mypasswd"
+      Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/keystore.p12"
+      Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=pwdpwd"
 
 - name: Reload systemd daemon
   become: true
