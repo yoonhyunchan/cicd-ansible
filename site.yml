@@ -6,8 +6,6 @@
 
 - name : Generate CSR 
   hosts: 
-    - gitlab
-    - jenkins_controller
     - harbor
   become: true
   roles:
@@ -18,28 +16,6 @@
   become: true
   roles:
     - setup_init
-
-- name: Install Gitlab
-  hosts: gitlab
-  become: true
-  vars_files:
-    - vars.yml
-  roles:
-    - gitlab
-
-- name: Install Jenkins
-  hosts: jenkins_controller
-  become: true
-  vars_files:
-    - vars.yml
-  roles:
-    - jenkins
-
-- name: Setting Jenkins Agent
-  hosts: jenkins_agent
-  become: true
-  roles:
-    - agent
 
 - name: Install Harbor
   hosts: harbor
