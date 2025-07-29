@@ -51,8 +51,8 @@
   community.crypto.openssl_pkcs12:
     action: export
     path: /var/lib/jenkins/keystore.p12
-    privatekey_path: "/etc/ssl/private/jenkins.{{ internal_domain }}.key"
-    certificate_path: "/etc/ssl/my_cert/jenkins.{{ internal_domain }}.crt"
+    privatekey_path: "/etc/ssl/private/{{ groups['jenkins'][0] }}.key"
+    certificate_path: "/etc/ssl/my_cert/{{ groups['jenkins'][0] }}.crt"
     friendly_name: mykey
     passphrase: pwdpwd
     state: present
@@ -96,7 +96,7 @@
     group: jenkins
     mode: '0700'
 
-- name: Add agent1 SSH key to Jenkins known_hosts
+- name: Add agents SSH key to Jenkins known_hosts
   become: true
   shell: |
     ssh-keyscan -H {{ item }} >> /var/lib/jenkins/.ssh/known_hosts
