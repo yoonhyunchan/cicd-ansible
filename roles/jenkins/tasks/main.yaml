@@ -99,6 +99,7 @@
 - name: Add agent1 SSH key to Jenkins known_hosts
   become: true
   shell: |
-    ssh-keyscan -H agent1.{{ internal_domain }} >> /var/lib/jenkins/.ssh/known_hosts
+    ssh-keyscan -H {{ item }} >> /var/lib/jenkins/.ssh/known_hosts
+  loop: "{{ groups['jenkins_agent'] }}"
   args:
     creates: /var/lib/jenkins/.ssh/known_hosts

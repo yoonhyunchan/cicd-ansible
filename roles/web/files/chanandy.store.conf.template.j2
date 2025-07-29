@@ -10,7 +10,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {
-        proxy_pass https://gitlab.{{ internal_domain }};  # GitLab 내부 IP
+        proxy_pass https://{{ groups['gitlab'][0] }};  # GitLab 내부 IP
         proxy_ssl_trusted_certificate /etc/pki/ca-trust/source/anchors/ca.crt;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -32,7 +32,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {
-        proxy_pass https://jenkins.{{ internal_domain }}:8443;  # jenkins 내부 IP
+        proxy_pass https://{{ groups['jenkins'][0] }}:8443;  # jenkins 내부 IP
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -52,7 +52,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {
-        proxy_pass https://harbor.{{ internal_domain }};  # GitLab 내부 IP
+        proxy_pass https://{{ groups['harbor'][0] }};  # GitLab 내부 IP
         proxy_ssl_trusted_certificate /etc/pki/ca-trust/source/anchors/ca.crt;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
