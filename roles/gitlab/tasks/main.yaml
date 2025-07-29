@@ -68,7 +68,7 @@
 - name: Copy CA certificate to gitlab ssl
   copy:
     src: /etc/pki/ca-trust/source/anchors/ca.crt
-    dest: /etc/gitlab/ssl/ca.crt
+    dest: /etc/gitlab/trusted-certs/ca.crt
     owner: root
     group: root
     mode: '0644'

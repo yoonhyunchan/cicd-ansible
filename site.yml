@@ -7,7 +7,7 @@
 - name : Generate CSR 
   hosts: 
     - gitlab
-    - jenkins_controller
+    - jenkins
     - harbor
   become: true
   roles:
