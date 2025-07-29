@@ -28,7 +28,7 @@
     - gitlab
 
 - name: Install Jenkins
-  hosts: jenkins_controller
+  hosts: jenkins
   become: true
   vars_files:
     - vars.yml
