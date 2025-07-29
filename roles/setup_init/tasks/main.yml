@@ -1,3 +1,4 @@
+# Install oh-my-bash and configure the default theme to 'agnoster'
 - name: Install git
   dnf:
     name: git
@@ -21,9 +22,10 @@
     regexp: '^OSH_THEME='
     line: 'OSH_THEME="agnoster"'
 
+# Add previously created custom CA certificate to system trust store
 - name: Copy CA certificate to anchors directory on Amazon Linux 2023
   copy:
-    src: /etc/ssl/my_cert/ca.crt   # localhost 경로 (Ansible control node)
+    src: /etc/ssl/my_cert/ca.crt   # localhost path (Ansible control node)
     dest: /etc/pki/ca-trust/source/anchors/ca.crt
     owner: root
     group: root

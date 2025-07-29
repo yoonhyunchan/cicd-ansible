@@ -15,7 +15,6 @@
     mode: '0755'
 
 
-
 - name: Create private key with password protection
   community.crypto.openssl_privatekey:
     path: /etc/ssl/private/ca.key

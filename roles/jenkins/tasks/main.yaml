@@ -51,8 +51,8 @@
   community.crypto.openssl_pkcs12:
     action: export
     path: /var/lib/jenkins/keystore.p12
-    privatekey_path: /etc/ssl/private/jenkins.chanandy.internal.key
-    certificate_path: /etc/ssl/my_cert/jenkins.chanandy.internal.crt
+    privatekey_path: "/etc/ssl/private/jenkins.{{ internal_domain }}.key"
+    certificate_path: "/etc/ssl/my_cert/jenkins.{{ internal_domain }}.crt"
     friendly_name: mykey
     passphrase: pwdpwd
     state: present

@@ -1,4 +1,2 @@
 external_domain: "chanandy.store"
 internal_domain: "chanandy.internal"
-cert_dir: /etc/ssl
-docker_cert_dir: "/etc/docker/certs.d/harbor.{{ internal_domain }}"

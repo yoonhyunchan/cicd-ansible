@@ -49,22 +49,22 @@
 
 - name: Convert .crt (PEM) to .cert (PEM)
   community.crypto.x509_certificate_convert:
-    src_path: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.crt"
-    dest_path: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.cert"
+    src_path: "/etc/ssl/my_cert/harbor.{{ internal_domain }}.crt"
+    dest_path: "/etc/ssl/my_cert/harbor.{{ internal_domain }}.cert"
     format: pem
 
 
 - name: Ensure docker cert directory exists
   file:
-    path: "{{ docker_cert_dir }}"
+    path: "/etc/docker/certs.d/harbor.{{ internal_domain }}"
     state: directory
     mode: '0755'
 
 - name: Copy certs within the remote server
-  shell: cp "{{ item.src }}" "{{ docker_cert_dir }}/{{ item.dest }}"
+  shell: cp "{{ item.src }}" "/etc/docker/certs.d/harbor.{{ internal_domain }}/{{ item.dest }}"
   loop:
-    - { src: "{{ cert_dir }}/my_cert/harbor.{{ internal_domain }}.cert", dest: "harbor.{{ internal_domain }}.cert" }
-    - { src: "{{ cert_dir }}/private/harbor.{{ internal_domain }}.key", dest: "harbor.{{ internal_domain }}.key" }
+    - { src: "/etc/ssl/my_cert/harbor.{{ internal_domain }}.cert", dest: "harbor.{{ internal_domain }}.cert" }
+    - { src: "/etc/ssl/private/harbor.{{ internal_domain }}.key", dest: "harbor.{{ internal_domain }}.key" }
     - { src: "/etc/pki/ca-trust/source/anchors/ca.crt", dest: "ca.crt" }
 
 - name: Restart Docker
