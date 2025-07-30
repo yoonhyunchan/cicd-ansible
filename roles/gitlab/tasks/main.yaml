@@ -57,9 +57,22 @@
     name: gitlab-ce
     state: present
 
-- name: Ensure /etc/gitlab/ssl directory exists
+
+- name: Generate /etc/gitlab/gitlab.rb from template
+  template:
+    src: ../files/gitlab.rb.template.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: '0644'
+
+
+- name: Reconfigure GitLab
+  command: gitlab-ctl reconfigure
+
+- name: Ensure /etc/gitlab/trusted-certs directory exists
   file:
-    path: /etc/gitlab/ssl
+    path: /etc/gitlab/trusted-certs
     state: directory
     owner: root
     group: root
@@ -72,15 +85,6 @@
     owner: root
     group: root
     mode: '0644'
-
-- name: Generate /etc/gitlab/gitlab.rb from template
-  template:
-    src: ../files/gitlab.rb.template.j2
-    dest: /etc/gitlab/gitlab.rb
-    owner: root
-    group: root
-    mode: '0644'
-
 
 - name: Reconfigure GitLab
   command: gitlab-ctl reconfigure

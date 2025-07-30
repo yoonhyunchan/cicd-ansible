@@ -51,8 +51,8 @@
   community.crypto.openssl_pkcs12:
     action: export
     path: /var/lib/jenkins/keystore.p12
-    privatekey_path: "/etc/ssl/private/{{ groups['jenkins'][0] }}.key"
-    certificate_path: "/etc/ssl/my_cert/{{ groups['jenkins'][0] }}.crt"
+    privatekey_path: "/etc/ssl/private/{{ groups['jenkins_controller'][0] }}.key"
+    certificate_path: "/etc/ssl/my_cert/{{ groups['jenkins_controller'][0] }}.crt"
     friendly_name: mykey
     passphrase: pwdpwd
     state: present
