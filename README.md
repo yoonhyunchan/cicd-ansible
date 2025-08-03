@@ -24,8 +24,13 @@ This Ansible playbook automates the deployment and configuration of a complete C
 **[[Devops] 04. Harbor Installation
 ](https://mon-roman.tistory.com/entry/Devops-01-Harbor-Installation)** - My Blog Post
 
+## ⚙️ Infrastructure as Code
+**[Terraform Repository](https://github.com/yoonhyunchan/aws-terraform-project)** - My Repo
+
+ Infrastructure setup for AWS EC2 instances, networking, and security groups required for the Kubernetes cluster deployment.
 
 ## 🏗️ Architecture Overview
+
 
 <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fbd1oJy%2FbtsOMOP7ON2%2FAAAAAAAAAAAAAAAAAAAAAAwpDOE_7G42o9KU3SgbD1RbRItI8Asg9ymLsDMPFGG3%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1756652399%26allow_ip%3D%26allow_referer%3D%26signature%3DVfQn2iIxuQcwrleGRUw%252Fp8mXQ%252B8%253D"  />
 
