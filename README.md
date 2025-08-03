@@ -13,16 +13,21 @@ This Ansible playbook automates the deployment and configuration of a complete C
 
 ## 📖 Blog Post
 **[[Devops] 01. Gitlab Installation
-](https://mon-roman.tistory.com/entry/01-Gitlab-Installation)** - My Blog Post
-
+](https://mon-roman.tistory.com/entry/01-Gitlab-Installation)** - My Blog Post<br>
 **[[Devops] 02. Jenkins Installation
-](https://mon-roman.tistory.com/entry/Devops-01-Jenkins-Installation)** - My Blog Post
-
+](https://mon-roman.tistory.com/entry/Devops-01-Jenkins-Installation)** - My Blog Post<br>
 **[[Devops] 03. Setting Up Jenkins Agents
-](https://mon-roman.tistory.com/entry/Devops-02-Setting-Up-Jenkins-Agents)** - My Blog Post
-
+](https://mon-roman.tistory.com/entry/Devops-02-Setting-Up-Jenkins-Agents)** - My Blog Post<br>
 **[[Devops] 04. Harbor Installation
-](https://mon-roman.tistory.com/entry/Devops-01-Harbor-Installation)** - My Blog Post
+](https://mon-roman.tistory.com/entry/Devops-01-Harbor-Installation)** - My Blog Post<br>
+
+## 🚪 Next Step
+**[[Devops] 05. Gitlab&Jenkins&Harbor Integration (1)
+](https://mon-roman.tistory.com/entry/Devops-04-GitlabJenkinsHarbor-Integration-1)** - My Blog Post<br>
+**[[Devops] 06. Gitlab&Jenkins&Harbor Integration (2)
+](https://mon-roman.tistory.com/entry/Devops-06-GitlabJenkinsHarbor-Integration-2)** - My Blog Post<br>
+**[[Devops] 07. Gitlab&Jenkins&Harbor Integration (3)
+](https://mon-roman.tistory.com/entry/Devops-07-GitlabJenkinsHarbor-Integration-3)** - My Blog Post<br>
 
 ## ⚙️ Infrastructure as Code
 **[Terraform Repository](https://github.com/yoonhyunchan/aws-terraform-project)** - My Repo
